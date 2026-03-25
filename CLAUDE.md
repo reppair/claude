@@ -81,6 +81,18 @@ expect(Auth::check())->toBeTrue()
     ->and(Auth::id())->toBe($user->id)
 ```
 
+### Testing FilamentPHP
+
+#### Filament Table Column Testing
+- Use assertTableColumnExists() with a truth test callback to assert column configuration (URL, description, etc.) instead of reflection.
+- Pass the record as the third argument so the column resolves in context.
+```php
+livewire(ListPosts::class)
+    ->assertTableColumnExists('author.name', function (TextColumn $column) use ($expected): bool {
+        return $column->getUrl() === $expected;
+    }, $record);
+```
+
 # Git Commit
 - When writing commit messages, use brief concise sentence to describe the entire work as a hole. Followed by a bullet list to describe each change.
 - The commit message should be balanced and concise, not too verbose yet not overlooking important details.
