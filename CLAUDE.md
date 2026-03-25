@@ -3,6 +3,8 @@
 
 # Plan Mode
 - If available, always consult with `laravel-boost` MCP "Search Docs" tool for accurate and up-to-date documentation for a specific version of a framework/package being used or discussed. This will provide valuable knowledge on framework/package specific concepts, conventions, methods, and practices. As well as examples.
+
+## Keep Plan Mode Short & Concise
 - Make the plan extremely concise. Sacrifice grammar for the sake of concision.
 - At the end of each plan, give me a list of unresolved questions to answer, if any.
 
