@@ -35,6 +35,13 @@
 - Never delete planned tests because they're not passing, instead ask what to do.
 - Don't create mock objects unless they will actually be called by the code during execution (throws early, not being called in current logic flow)
 
+## Database Setup in Tests
+- When a test requires database setup, do it. Don't hesitate.
+- Always use model factories to create database records in tests.
+- If a page/component requires specific data (SEO settings, configuration, related models), seed it properly through factories.
+- Properly test real integration rather than avoiding database setup with simplified assertions.
+- Simplified assertions are acceptable, but don't reach for them just to avoid database setup. Use them as additional checks or in unit tests.
+
 ## Testing Laravel, LivewirePHP, and FilamentPHP
 - Alway prefer using first-party testing helper methods over general testing methods.
 - Consider the framework/package documentation via laravel-boost docs tool on testing best practices, examples, and assertions before writing tests manually.
