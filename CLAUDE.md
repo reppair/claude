@@ -96,6 +96,7 @@ livewire(ListPosts::class)
 # Git Commit
 - When writing commit messages, use brief concise sentence to describe the entire work as a hole. Followed by a bullet list to describe each change.
 - The commit message should be balanced and concise, not too verbose yet not overlooking important details.
+- Don't use `git -C <path>` when already in the project working directory. Run git commands directly.
 
 # Laravel
 
