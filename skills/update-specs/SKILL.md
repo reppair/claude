@@ -29,6 +29,9 @@ No specs/ directory found in this project — nothing to update.
 
 List filenames in `specs/` first. Based on filenames alone, identify which specs *might* be affected by the scope. Only read the contents of those likely matches — don't read every spec unless explicitly asked to.
 
+#### 3.1. Progress tracking
+Look for `specs/*-status.md` / `specs/tasks.md` or other similar files that may be present for as means to track progress, read them, understand the structure and content, how they relate to the scope, and update them as necessary.
+
 ### 4. Present and confirm
 
 Only show specs that need action. If nothing needs updating, say so and stop.
