@@ -53,9 +53,11 @@
 - Avoid using `assertSee()`, if more suitable way to test state/outcome. Only use it when it makes sense (explicitly want to assert some element or text is seen in the rendered response).
 - Don't assert against statically rendered text (text content changes frequently).
 - Prefer existing element attributes. Use stable attributes like `wire:model`, `name`, `id` that are already in the element.
-- Fallback to data attributes - Only add `data-wire-{something}` if no existing attribute is suitable.
+- Fallback to data attributes - Only add `data-lw-{property}` if no existing attribute is suitable. Convention: `data-lw-{section}` on sections, `data-lw-{entity}="{value}"` on repeated items, `data-lw-{entity}-{part}` on sub-elements (e.g., `data-lw-domain-badge`).
+- Exception: when values are created via test factories (known, stable data), assert against those values directly instead of adding data attributes just for testing. Data attributes are for structural assertions (presence, count, order), not for content that's already controlled by the test setup.
 
 ### PestPHP
+- Use `$this->mock()` over bare `mock()` (Mockery). `$this->mock()` binds the mock in Laravel's container, so the class under test can be resolved via `app()` with all dependencies injected automatically. Bare `mock()` requires manual constructor wiring.
 - When writing sequence of expect() assertion, chain them or use higher order proxy calls. Example:
 ```php
 expect($firstOption)
