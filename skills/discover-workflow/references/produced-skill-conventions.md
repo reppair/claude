@@ -4,11 +4,11 @@ Load this file at step 7 of `discover-workflow`, before invoking `skill-creator`
 
 ## Location
 
-Write the skill to `.ai/skills/<slot>/SKILL.md`. Do **not** create a `.claude/skills/<slot>` symlink — `php artisan boost:install` (or `boost:update`) wires custom skills automatically. If the project has no `.ai/skills/` directory (non-Laravel-Boost project), fall back to `.claude/skills/<slot>/SKILL.md` directly.
+Write the skill to `.ai/skills/<slot>/SKILL.md`. Do **not** create a `.claude/skills/<slot>` symlink — `php artisan boost:update` wires custom skills automatically. If the project has no `.ai/skills/` directory (non-Laravel-Boost project), fall back to `.claude/skills/<slot>/SKILL.md` directly.
 
 ## After writing the skill
 
-If the skill was written under `.ai/skills/`, run `php artisan boost:install` via Bash so Boost registers it. If under `.claude/skills/`, no further action — the harness picks it up automatically.
+If the skill was written under `.ai/skills/`, run `php artisan boost:update` via Bash so Boost re-syncs and registers it. Do not use `boost:install` for this — that command is for initial Boost setup and prompts to select agents/features; `boost:update` is the right command for refreshing existing Boost resources after editing or adding a skill. If the skill was written under `.claude/skills/`, no further action — the harness picks it up automatically.
 
 Boost regenerates the project-root `CLAUDE.md` on each run — treat it as a build artifact. Never edit it by hand; if project conventions need to change, update the source (the skill itself, or rules in `.claude/rules/`).
 
