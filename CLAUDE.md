@@ -100,6 +100,10 @@ livewire(ListPosts::class)
 - The commit message should be balanced and concise, not too verbose yet not overlooking important details.
 - Don't use `git -C <path>` when already in the project working directory. Run git commands directly.
 
+# Skills
+- Laravel projects use `.ai/skills/<slot>/SKILL.md` as the canonical install location for Claude Code skills. Default to that path when creating project-level skills; fall back to `.claude/skills/<slot>/SKILL.md` if `.ai/skills/` doesn't exist.
+- After writing a new skill in `.ai/skills/`, instruct the user to run `php artisan boost:install` so Laravel Boost registers it. Boost handles wiring (no manual symlinks) and regenerates the project-root `CLAUDE.md` — treat that file as a build artifact and never edit it by hand.
+
 # Laravel
 
 ## Laravel Boost Integration
