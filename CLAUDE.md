@@ -106,6 +106,9 @@ livewire(ListPosts::class)
 
 # Laravel
 
+## PHP Version (Herd)
+- If a `php`/`artisan`/`composer` command fails on PHP version, don't juggle binaries — just tell me which version to switch Herd to and I'll do it with one click.
+
 ## Laravel Boost Integration
 Beware of the laravel-boost MCP server and make the most of the tools it provides. Prioritize using boost tools for database schema lookups, artisan tinker use, reading application logs, and anything else it provides tools for.
 
