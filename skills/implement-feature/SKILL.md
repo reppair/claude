@@ -16,6 +16,14 @@ This skill assumes a **Laravel + Pest + Laravel Boost** project and a **spec-dri
 
 The log is **mutable**: when a later pipeline step disproves an earlier entry, *remove* it (don't strike through). Re-read the whole log right before opening the PR and prune anything later steps invalidated. The pruned log feeds the PR body in §8 so the reviewer sees every still-standing deliberate deviation in one place.
 
+**Delegate to sub-agents to protect context — use them extensively.** Push heavy, read-only work into sub-agents (the `Agent` tool) so only their conclusions return to this session, never the file dumps. The main loop holds the plan, the `TaskCreate` state, the judgment-call log, and the decision gates; sub-agents do the fan-out reading and report back compactly. Apply this throughout:
+
+- **Pick-up & planning (§1–§2)** — spec exploration, task-list/index reading, sibling-pattern scans: delegate to `Explore` (or a general sub-agent) and keep only the resolved paths + findings.
+- **Implementation (§3)** — `laravel-simplifier` is already a subagent; route schema/doc lookups and convention-inference reads through sub-agents too.
+- **Pipeline (§5)** — each review skill is its own pass; let its raw output stay in the sub-agent and surface only the findings into the main loop.
+
+Spawn parallel sub-agents for independent reads. Reserve main-loop context for decisions, not raw material.
+
 ## 1. Pick up the work
 
 **Always read:**
@@ -38,7 +46,7 @@ Then use `TaskCreate` to break the work into discrete units. One task per shippa
 
 **Granular pipeline tasks are a hard gate before §5.** Before advancing to §5, expand `TaskCreate` to cover *every individual item* in §5 and §6 — each skill invocation, each `laravel-simplifier` subagent pass, each Bash command, the `CHANGELOG` edit, and the end-of-run reconciliation. One task per item; never a single "run the pipeline" bucket — a bucket hides silent skips. This list is also the source for the §7 reconciliation table.
 
-**No silent skips.** Every §5/§6 task must end `completed` with either the step's actual output *or* a one-line `skipReason` when environmentally blocked. "Feels disproportionate" / "diff is small" are **not** valid skip reasons — only genuine environmental blockers are (e.g. `skipReason: PhpStorm IDE not connected to this workspace`).
+**No silent skips.** Every §5/§6 task must end `completed` with either the step's actual output *or* a one-line `skipReason` when environmentally blocked. "Feels disproportionate" / "diff is small" are **not** valid skip reasons — only genuine environmental blockers are (e.g. `skipReason: Chrome DevTools MCP not registered in this session`).
 
 If breaking the work down surfaces gaps, contradictions, or unclear areas in the spec, **stop and invoke the `grill-me` skill** to resolve them with the user before continuing. Apply any spec updates that fall out (same handling as the §1 blocker — intent artifact, decisions, glossary, parked issues; offer to commit and restart fresh if context burn warrants it).
 
@@ -80,11 +88,10 @@ php artisan test --compact --parallel
 
 Run **in order** before commit. Each is an installed skill. Each has its own granular task from §2 and closes with output or a one-line `skipReason` (no silent skips).
 
-1. **`phpstorm-plugin:php-code-review`** — PhpStorm inspections on each new PHP file. Cheap linter-style pass first, so the heavier reviewers below don't re-flag the same noise. **Gated on PhpStorm IDE connection:** invoke only if the PhpStorm IDE MCP is connected to this workspace (`mcp__ide__*` tools registered). If not, skip with `skipReason: PhpStorm IDE not connected to this workspace`. Do **not** substitute a manual review — that masquerades as having run the step.
-2. **`coverage`** — CRAP analysis. Close any real gaps now — filling them often surfaces logic the rest of the pipeline should evaluate too.
-3. **`code-review`** with `--effort high` — correctness bugs
-4. **`security-review`** — OWASP-class issues on the diff
-5. **`verify`** — invoke the **`verify` skill**; let it drive the structured check list (golden path + edge cases + error states + period-switching). Do **not** reach for `mcp__chrome-devtools__*` tools yourself and call a single golden-path screenshot "verified" — the skill encodes the edge/error checks a manual pass misses. (Under Polyscope, see the final section for how `verify` chooses its driver.)
+1. **`coverage`** — CRAP analysis. Close any real gaps now — filling them often surfaces logic the rest of the pipeline should evaluate too.
+2. **`code-review`** with `--effort high` — correctness bugs
+3. **`security-review`** — OWASP-class issues on the diff
+4. **`verify`** — invoke the **`verify` skill**; let it drive the structured check list (golden path + edge cases + error states + period-switching). Do **not** reach for `mcp__chrome-devtools__*` tools yourself and call a single golden-path screenshot "verified" — the skill encodes the edge/error checks a manual pass misses. (Under Polyscope, see the final section for how `verify` chooses its driver.)
 
 Address every CONFIRMED / KEEP finding before moving on. PLAUSIBLE findings get a judgement call — and if a later step disproves a logged finding, remove it from the judgment-call log (per the log rules at the top).
 
@@ -107,8 +114,8 @@ After all §5–§6 tasks complete and **before any commit / PR action or closin
 
 | Step | Status | Notes |
 |---|---|---|
-| `php-code-review` | ✅ | 0 findings |
 | `coverage` | ⚠️ | CRAP gap on `handle()` branch; added test |
+| `code-review --effort high` | ✅ | 0 findings |
 | `security-review` | ❌ | `skipReason: env-blocked, MCP unavailable` |
 
 This table is the **decision point** — never auto-commit. After emitting it, stop and ask the user: *"Proceed with `/commit` + `/pr`, or address [specific row] first?"* Only on approval move to §8.
@@ -136,4 +143,4 @@ These rules apply only under Polyscope (detection in the intro). Outside Polysco
 
 **Artefact location.** Use `.context/` (workspace root) for verify screenshots, intermediate diagrams, and session droppings. Ensure `/.context` is in `.gitignore` as a **root-only pattern** (`/.context`, not `**/.context`) so only the workspace-root directory is ignored. These artefacts are session-only — deleting the Polyscope workspace removes them, which is fine; they're not project content.
 
-**`verify` driver choice.** The `verify` skill (§5.5) decides its driver based on the check. Default to the **Polyscope integrated preview** where possible — it handles cookies, auth, and most flows. Fall back to **Chrome DevTools** (`mcp__chrome-devtools__*`) only when a check can't be done via preview or fails there — *and only if those tools are registered in this session* (they may be absent, e.g. Polyscope on a remote VPS). Save screenshots to `.context/` either way.
+**`verify` driver choice.** The `verify` skill (§5.4) decides its driver based on the check. Default to the **Polyscope integrated preview** where possible — it handles cookies, auth, and most flows. Fall back to **Chrome DevTools** (`mcp__chrome-devtools__*`) only when a check can't be done via preview or fails there — *and only if those tools are registered in this session* (they may be absent, e.g. Polyscope on a remote VPS). Save screenshots to `.context/` either way.
